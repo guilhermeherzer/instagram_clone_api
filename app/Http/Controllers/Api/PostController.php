@@ -27,6 +27,8 @@ class PostController extends Controller
 
     	$lista_seguidos = explode(',', $seguidos->lista_seguidos);
 
+    	array_push($lista_seguidos, $request->id);
+    	
     	$posts = DB::table("posts")
     		->select('posts.*', 'users.user', 'users.user_img')
     		->leftJoin('users', 'users.id', 'posts.user_id')
