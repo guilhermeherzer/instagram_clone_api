@@ -22,8 +22,9 @@ class PostController extends Controller
     		->where('user_id', $request->id)
     		->first();
 
-    	if($seguidores->lista_seguidores != ""):
-    		$num_seguidores = count(explode(',', $seguidores->lista_seguidores));
+    	if($seguidores->lista_seguidores):
+    		$num_seguidores = unserialize($seguidores->lista_seguidores);
+    		$num_seguidores = count($num_seguidores);
     	else:
     		$num_seguidores = 0;
     	endif;
@@ -34,8 +35,9 @@ class PostController extends Controller
     		->where('user_id', $request->id)
     		->first();
 
-    	if($seguidos->lista_seguidos != ""):
-    		$num_seguidos = count(explode(',', $seguidos->lista_seguidos));
+    	if($seguidos->lista_seguidos):
+    		$num_seguidos = unserialize($seguidos->lista_seguidos);
+    		$num_seguidos = count($num_seguidos);
     	else:
     		$num_seguidos = 0;
     	endif;
@@ -152,9 +154,9 @@ class PostController extends Controller
 
     	$num_posts = count($posts);
 
-    	$num_seguidos = count(explode(',', $user->lista_seguidos));
+    	$num_seguidos = count($seguidos);
 
-    	$num_seguidores = count(explode(',', $user->lista_seguidores));
+    	$num_seguidores = count($seguidores);
 
     	$responseData = array(
     		'status_seguir' => $status_seguir,
