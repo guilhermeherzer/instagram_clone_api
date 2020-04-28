@@ -10,7 +10,7 @@ use DB;
 class PostController extends Controller
 {
     //
-    public function meus_posts(Request $request){
+    public function meu_perfil(Request $request){
     	$user = DB::table('users')
     		->select('name', 'user', 'user_img')
     		->where('id', $request->id)
