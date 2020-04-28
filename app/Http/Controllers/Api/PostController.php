@@ -19,4 +19,23 @@ class PostController extends Controller
 
     	return response()->json(compact('responseData'));
     }
+    
+    public function feed(Request $request){
+    	$seguidos = DB::table('seguidos')
+    		->where('user_id', $request->id)
+    		->first();
+
+    	$lista_seguidos = explode(',', $seguidos->lista_seguidos);
+
+    	$posts = DB::table("posts")
+    		->select('posts.*', 'users.user', 'users.user_img')
+    		->leftJoin('users', 'users.id', 'posts.user_id')
+    		->whereIn('posts.user_id', $lista_seguidos)
+    		->orderBy('posts.created_at', 'desc')
+    		->get();
+
+    	$responseData = array('data' => $posts);
+
+    	return response()->json(compact('responseData'));
+    }
 }
