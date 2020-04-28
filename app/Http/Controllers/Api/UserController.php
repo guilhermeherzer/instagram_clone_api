@@ -50,26 +50,49 @@ class UserController extends Controller
 
     public function cadastrar(Request $request){
         $name     		= $request->name;
+        $user_name      = $request->user;
         $email          = $request->email;
-        $password       	= $request->password;
+        $password       = $request->password;
 
         $user = DB::table('users')->where('email', '=', $email)->get();
+
         if(count($user) == '1'):
             $responseData = array('success'=>'0', 'message'=>"E-mail já cadastrado!");
         else:
+            /* Cadastra o usuário e resgata seu id */
             $user_data = array(
                 'name'                        		=>  $name,
+                'user'                              =>  $user_name,
                 'email'                             =>  $email,
                 'password'                          =>  Hash::make($password),
                 'created_at'                        =>  date('Y-m-d H:i:s'),
                 'updated_at'                        =>  date('Y-m-d H:i:s')
             );
 
-            $users_id = DB::table('users')->insertGetId($user_data);
+            $user_id = DB::table('users')->insertGetId($user_data);
 
+            /* Cadastra o usuário na tabela de seguidores */
+            $seguidores_data = array(
+                'user_id'                           =>  $user_id,
+                'created_at'                        =>  date('Y-m-d H:i:s'),
+                'updated_at'                        =>  date('Y-m-d H:i:s')
+            );
+
+            DB::table('seguidores')->insert($seguidores_data);
+
+            /* Cadastra o usuário na tabela de seguidos */
+            $seguidos_data = array(
+                'user_id'                           =>  $user_id,
+                'created_at'                        =>  date('Y-m-d H:i:s'),
+                'updated_at'                        =>  date('Y-m-d H:i:s')
+            );
+
+            DB::table('seguidos')->insert($seguidos_data);
+
+            /* Resgata os dados do usuário, cria o token e realiza o login */
             $userId = DB::table('users')
                 ->select('id')
-                ->where('id', '=', $users_id)
+                ->where('id', '=', $user_id)
                 ->first();
 
             $credentials = $request->only('email', 'password');
