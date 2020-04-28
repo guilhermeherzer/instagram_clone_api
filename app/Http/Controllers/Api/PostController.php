@@ -81,4 +81,162 @@ class PostController extends Controller
 
     	return response()->json(compact('responseData'));
     }
+
+    public function ver_perfil(Request $request){
+    	/*
+    		Resgata as informações do usuário
+    	*/
+    	$user_auth = DB::table('users')
+    		->select('users.name', 'users.user', 'users.user_img', 'seguidos.lista_seguidos')
+    		->leftJoin('seguidos', 'seguidos.user_id', 'users.id')
+    		->where('users.id', $request->myid)
+    		->first();
+
+    	/*
+			 Verifica se o usuário já esta sendo seguido ou não
+		*/
+    	$seguidos_auth = in_array($request->userid, explode(',', $user_auth->lista_seguidos));
+
+    	/*
+    		Resgata as informações do usuário
+    	*/
+    	$user = DB::table('users')
+    		->select('users.name', 'users.user', 'users.user_img', 'seguidores.lista_seguidores', 'seguidos.lista_seguidos')
+    		->leftJoin('seguidores', 'seguidores.user_id', 'users.id')
+    		->leftJoin('seguidos', 'seguidos.user_id', 'users.id')
+    		->where('users.id', $request->userid)
+    		->first();
+
+    	/*
+			 Verifica se o usuário já esta sendo seguido ou não
+		*/
+    	$seguidores = in_array($request->myid, explode(',', $user->lista_seguidores));
+
+    	$seguidos = in_array($request->myid, explode(',', $user->lista_seguidos));
+
+    	/*
+    		Faz os testes para ver o status
+    	*/
+    	
+    	if($seguidos_auth && $seguidos && $seguidores):
+    		$status_seguir = array(
+    			'id' => 1,
+    			'texto' => "Seguindo"
+    		);
+    	elseif(!$seguidos_auth && $seguidos && !$seguidores):
+    		$status_seguir = array(
+    			'id' => 2,
+    			'texto' => "Seguir de Volta"
+    		);
+    	elseif($seguidos_auth && !$seguidos && $seguidores):
+    		$status_seguir = array(
+    			'id' => 1,
+    			'texto' => "Seguindo"
+    		);
+    	else:
+    		$status_seguir = array(
+    			'id' => 0,
+    			'texto' => "Seguir"
+    		);
+    	endif;
+
+    	/*
+    		Resgata todos os posts do usuário
+    	*/
+    	$posts = DB::table('posts')
+    		->where('user_id', $request->userid)
+    		->get();
+
+    	$num_posts = count($posts);
+
+    	$num_seguidos = count(explode(',', $user->lista_seguidos));
+
+    	$num_seguidores = count(explode(',', $user->lista_seguidores));
+
+    	$responseData = array(
+    		'status_seguir' => $status_seguir,
+
+    		'user' => $user, 
+    		'posts' => $posts, 
+    		'num_posts' => $num_posts, 
+    		'num_seguidores' => $num_seguidores, 
+    		'num_seguidos' => $num_seguidos
+    	);
+
+    	return response()->json(compact('responseData'));
+    }
+
+    public function seguir(Request $request){
+    	/* Resgata as informações do usuário auth */
+    	$user_auth = DB::table('users')
+    		->select('users.name', 'users.user', 'users.user_img', 'seguidos.lista_seguidos')
+    		->leftJoin('seguidos', 'seguidos.user_id', 'users.id')
+    		->where('users.id', $request->myid)
+    		->first();
+
+    	/* Verifica se o usuário auth já esta seguindo ou não */
+    	if($user_auth->lista_seguidos):
+    		$seguidos = unserialize($user_auth->lista_seguidos);
+    	else:
+    		$seguidos = array();
+    	endif;
+
+    	/* Resgata as informações do usuário */
+    	$user = DB::table('users')
+    		->select('users.name', 'users.user', 'users.user_img', 'seguidores.lista_seguidores')
+    		->leftJoin('seguidores', 'seguidores.user_id', 'users.id')
+    		->where('users.id', $request->userid)
+    		->first();
+
+    	/* Verifica se o usuário já esta sendo seguido ou não */
+    	if($user->lista_seguidores):
+    		$seguidores = unserialize($user->lista_seguidores);
+    	else:
+    		$seguidores = array();
+    	endif;
+
+    	/* Faz o teste para a validação dos dados */
+    	if(!in_array($request->userid, $seguidos) && !in_array($request->myid, $seguidores)):
+    		array_push($seguidos, intval($request->userid));
+    		$seguidos = serialize($seguidos);
+
+    		array_push($seguidores, intval($request->myid));
+    		$seguidores = serialize($seguidores);
+
+    		$seguidos_data = array(
+    			'user_id' => $request->myid,
+    			'lista_seguidos' => $seguidos,
+    		);
+
+    		$seguidores_data = array(
+    			'user_id' => $request->userid,
+    			'lista_seguidores' => $seguidores,
+    		);
+
+    		$seguidos = DB::table('seguidos')->where('user_id', $request->myid)->update($seguidos_data);
+    		$seguidores = DB::table('seguidores')->where('user_id', $request->userid)->update($seguidores_data);
+
+    		if($seguidos && $seguidores):
+    			$responseData = array('success'=>'1', 'message'=>"Seguindo com sucesso!");
+    		endif;
+    	elseif(!in_array($request->userid, $seguidos) && in_array($request->myid, $seguidores)):
+    		array_push($seguidos, intval($request->userid));
+    		$seguidos = serialize($seguidos);
+
+    		$seguidos_data = array(
+    			'user_id' => $request->myid,
+    			'lista_seguidos' => $seguidos,
+    		);
+
+    		$seguidos = DB::table('seguidos')->where('user_id', $request->myid)->update($seguidos_data);
+
+    		if($seguidos && $seguidores):
+    			$responseData = array('success'=>'1', 'message'=>"Seguindo de Volta com sucesso!");
+    		endif;
+    	else:
+    		$responseData = array('success'=>'0', 'message'=>"Erro ao seguir!");
+    	endif;
+
+    	return response()->json(compact('responseData'));
+    }
 }
