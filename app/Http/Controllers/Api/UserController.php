@@ -17,7 +17,11 @@ class UserController extends Controller
     public function login(Request $request){
     	$email = $request->email;
         $password = $request->password;
-        $user = DB::table('users')->where('email', '=', $email)->first();
+
+        $user = DB::table('users')
+            ->where('email', '=', $email)
+            ->first();
+
         if($user):
             if(Hash::check($password, $user->password)):
                 $credentials = $request->only('email', 'password');
@@ -28,7 +32,13 @@ class UserController extends Controller
                 } catch (JWTException $e) {
                     return response()->json(['error' => 'could_not_create_token'], 500);
                 }
-                $responseData = array('success'=>'1', 'token'=>$token, 'data'=>$user, 'message'=>"Logado com sucesso!");
+
+                $userId = DB::table('users')
+                    ->select('id')
+                    ->where('email', '=', $email)
+                    ->first();
+
+                $responseData = array('success'=>'1', 'token'=>$token, 'data'=>$userId, 'message'=>"Logado com sucesso!");
             else:
                 $responseData = array('success'=>'0', 'message'=>"Senha incorreta!");
             endif;
@@ -54,14 +64,19 @@ class UserController extends Controller
                 'created_at'                        =>  date('Y-m-d H:i:s'),
                 'updated_at'                        =>  date('Y-m-d H:i:s')
             );
+
             $users_id = DB::table('users')->insertGetId($user_data);
-            $userData = DB::table('users')->where('id', '=', $users_id)->first();
+
+            $userId = DB::table('users')
+                ->select('id')
+                ->where('id', '=', $users_id)
+                ->first();
 
             $credentials = $request->only('email', 'password');
 
             $token = JWTAuth::attempt($credentials);
 
-            $responseData = array('success'=>'1', 'token'=>$token, 'data'=>$userData, 'message'=>"Cadastrado com sucesso!");
+            $responseData = array('success'=>'1', 'token'=>$token, 'data'=>$userId, 'message'=>"Cadastrado com sucesso!");
         endif;
         return response()->json(compact('responseData'));
     }
