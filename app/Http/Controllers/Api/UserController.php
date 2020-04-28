@@ -50,7 +50,7 @@ class UserController extends Controller
             $user_data = array(
                 'name'                        		=>  $name,
                 'email'                             =>  $email,
-                'password'                          	=>  Hash::make($password),
+                'password'                          =>  Hash::make($password),
                 'created_at'                        =>  date('Y-m-d H:i:s'),
                 'updated_at'                        =>  date('Y-m-d H:i:s')
             );
