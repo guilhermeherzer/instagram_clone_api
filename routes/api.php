@@ -24,3 +24,4 @@ Route::get('/meu_perfil/{id}',				'Api\PostController@meu_perfil');
 Route::get('/feed/{id}',					'Api\PostController@feed');
 Route::get('/ver_perfil/{myid}/{userid}',	'Api\PostController@ver_perfil');
 Route::post('/seguir/{myid}/{userid}',		'Api\PostController@seguir');
+Route::get('/buscar/{texto?}',				'Api\PostController@buscar');
