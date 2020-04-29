@@ -63,6 +63,7 @@ class UserController extends Controller
             $user_data = array(
                 'name'                        		=>  $name,
                 'user'                              =>  $user_name,
+                'user_img'                          =>  'assets/img/profiles/padrao.jpg',
                 'email'                             =>  $email,
                 'password'                          =>  Hash::make($password),
                 'created_at'                        =>  date('Y-m-d H:i:s'),
