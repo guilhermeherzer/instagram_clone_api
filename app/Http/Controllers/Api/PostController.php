@@ -235,7 +235,7 @@ class PostController extends Controller
     public function buscar(Request $request){
     	if(!is_null($request->texto)):
 	    	$users = DB::table('users')
-	    		->select('name', 'user', 'user_img')
+	    		->select('id', 'name', 'user', 'user_img')
 	    		->where('user', 'LIKE', $request->texto.'%')
 	    		->get();
     	else:
