@@ -232,6 +232,55 @@ class PostController extends Controller
     	return response()->json(compact('responseData'));
     }
 
+    public function desseguir(Request $request){
+    	$user_auth = DB::table('users')
+    		->leftJoin('seguidos', 'seguidos.user_id', 'users.id')
+    		->where('users.id', $request->myid)
+    		->first();
+
+    	$seguidos = unserialize($user_auth->lista_seguidos);
+
+    	$user = DB::table('users')
+    		->leftJoin('seguidores', 'seguidores.user_id', 'users.id')
+    		->where('users.id', $request->userid)
+    		->first();
+
+    	$seguidores = unserialize($user->lista_seguidores);
+
+    	if(in_array($request->userid, $seguidos) && in_array($request->myid, $seguidores)):
+    		$myid = intval(array_search($request->myid, $seguidores));
+    		$userid = intval(array_search($request->userid, $seguidos));
+
+    		array_splice($seguidores, $myid, 1);
+    		array_splice($seguidos, $userid, 1);
+
+    		$seguidos = serialize($seguidos);
+    		$seguidores = serialize($seguidores);
+
+    		$seguidos_data = array(
+    			'lista_seguidos' => $seguidos,
+    		);
+
+    		$seguidores_data = array(
+    			'lista_seguidores' => $seguidores
+    		);
+
+    		$seguidos = DB::table('seguidos')->where('user_id', $request->myid)->update($seguidos_data);
+    		$seguidores = DB::table('seguidores')->where('user_id', $request->userid)->update($seguidores_data);
+
+    		if($seguidos && $seguidores):
+    			$success = 1;
+    		else:
+    			$success = 0;
+    		endif;
+
+    		$responseData = array('success'=>$success);
+    	else:
+    	endif;
+
+    	return response()->json(compact('responseData'));
+    }
+
     public function buscar(Request $request){
     	if(!is_null($request->texto)):
 	    	$users = DB::table('users')
