@@ -68,9 +68,13 @@ class PostController extends Controller
     		->where('user_id', $request->id)
     		->first();
 
-    	$lista_seguidos = explode(',', $seguidos->lista_seguidos);
+    	if($seguidos->lista_seguidos):
+    		$lista_seguidos = unserialize($seguidos->lista_seguidos);
+    	else:
+    		$lista_seguidos = array();
+    	endif;
 
-    	array_push($lista_seguidos, $request->id);
+    	array_push($lista_seguidos, intval($request->id));
     	
     	$posts = DB::table("posts")
     		->select('posts.*', 'users.user', 'users.user_img')
@@ -95,7 +99,6 @@ class PostController extends Controller
     	/* Verifica se o usuário já esta sendo seguido ou não */
 		if($user_auth->lista_seguidos):
 	    	$seguidos_auth = unserialize($user_auth->lista_seguidos);
-	    	$seguidos_auth = in_array($request->userid, $seguidos_auth);
 	    else:
 	    	$seguidos_auth = array();
 	    endif;
@@ -111,31 +114,29 @@ class PostController extends Controller
     	/* Verifica se o usuário já esta sendo seguido ou não */
     	if($user->lista_seguidores):
 	    	$seguidores = unserialize($user->lista_seguidores);
-	    	$seguidores = in_array($request->myid, $seguidores);
 	    else:
 	    	$seguidores = array();
 	    endif;
 
 	    if($user->lista_seguidos):
 	    	$seguidos = unserialize($user->lista_seguidos);
-	    	$seguidos = in_array($request->myid, $seguidos);
 	    else:
 	    	$seguidos = array();
 	    endif;
 
     	/* Faz os testes para ver o status */
     	
-    	if($seguidos_auth && $seguidos && $seguidores):
+    	if(in_array($request->userid, $seguidos_auth) && in_array($request->myid, $seguidores)):
     		$status_seguir = array(
     			'id' => 1,
     			'texto' => "Seguindo"
     		);
-    	elseif(!$seguidos_auth && $seguidos && !$seguidores):
+    	elseif(!in_array($request->userid, $seguidos_auth) && in_array($request->myid, $seguidos) && !in_array($request->myid, $seguidores)):
     		$status_seguir = array(
     			'id' => 2,
     			'texto' => "Seguir de Volta"
     		);
-    	elseif($seguidos_auth && !$seguidos && $seguidores):
+    	elseif(in_array($request->userid, $seguidos_auth) && !in_array($request->myid, $seguidos) && in_array($request->myid, $seguidores)):
     		$status_seguir = array(
     			'id' => 1,
     			'texto' => "Seguindo"
