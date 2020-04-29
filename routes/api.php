@@ -29,4 +29,4 @@ Route::get('/buscar/{texto?}',				'Api\PostController@buscar');
 Route::get('/ver_perfil/{myid}/{userid}',	'Api\PostController@ver_perfil');
 
 Route::post('/seguir/{myid}/{userid}',		'Api\PostController@seguir');
-Route::get('/desseguir/{myid}/{userid}',	'Api\PostController@desseguir');
+Route::post('/desseguir/{myid}/{userid}',	'Api\PostController@desseguir');
