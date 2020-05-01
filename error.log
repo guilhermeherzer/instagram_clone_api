@@ -1,0 +1,1 @@
+[Thu Apr 30 22:17:06.355519 2020] [php7:warn] [pid 3144:tid 1872] [client ::1:54981] PHP Warning:  Unterminated comment starting line 318 in C:\\Users\\Guilherme Rosa\\PHP\\mejuana_api\\app\\Http\\Controllers\\Api\\PostController.php on line 318

@@ -295,4 +295,85 @@ class PostController extends Controller
 
     	return response()->json(compact('responseData'));
     }
+
+    public function comentarios(Request $request){
+        $user_auth = DB::table('users')
+            ->where('id', $request->my_id)
+            ->first();
+
+        $user_auth = array('user_img' => $user_auth->user_img);
+
+        $post = DB::table('posts')
+            ->where('id', $request->post_id)
+            ->first();
+
+        $user_post = DB::table('users')
+            ->where('id', $post->user_id)
+            ->first();
+
+        $user_post = array('user' => $user_post->user, 'user_img' => $user_post->user_img);
+
+        $post = array('legenda' => $post->legenda, 'user' => $user_post);
+
+        $comentarios_dados = array();
+
+        $comentarios = DB::table('comentarios')
+            ->where('post_id', $request->post_id)
+            ->first();
+
+        $comentarios = unserialize($comentarios->dados);
+
+        foreach($comentarios['comentarios'] as $c):
+            $user = DB::table('users')
+                ->where('id', $c['user_id'])
+                ->first();
+
+            $user_dado = array('id' => $user->id, 'user' => $user->user, 'user_img' => $user->user_img);
+
+            $dado = array('id' => $c['id'], 'texto' => $c['texto'], 'criado_em' => '1', 'user' => $user_dado);
+
+            $comentario = array('comentario' => $dado);
+
+            array_push($comentarios_dados, $comentario);
+
+        endforeach;
+
+        $responseData = array('user_auth' => $user_auth, 'post' => $post, 'comentarios'=>$comentarios_dados);
+
+        return response()->json(compact('responseData'));
+    }
+
+    public function comentar(Request $request){
+        $comentarios = DB::table('comentarios')
+            ->where('post_id', $request->post_id)
+            ->first();
+
+        $comentarios = unserialize($comentarios->dados);
+
+        $quantidade = count($comentarios['comentarios']) + 1;
+
+        $dado = array('id' => $quantidade, 'user_id' => intval($request->my_id), 'texto' => $request->texto);
+
+        array_push($comentarios['comentarios'], $dado);
+
+        $comentarios = serialize($comentarios);
+
+        if($comentarios):
+            $comentario_data = array(
+                'dados' => $comentarios,
+                'updated_at' => date('Y-m-d H:i:s')
+            );
+
+            DB::table('comentarios')->where('post_id', $request->post_id)->update($comentario_data);
+            
+            $responseData = array('success'=>'1');
+        else:
+            $responseData = array('success'=>'0');
+        endif;
+        //$comentarios = serialize(array('comentarios' => array()));
+        //$responseData = array('data'=>$comentarios);
+
+
+        return response()->json(compact('responseData'));
+    }
 }

@@ -30,3 +30,6 @@ Route::get('/ver_perfil/{myid}/{userid}',	'Api\PostController@ver_perfil');
 
 Route::post('/seguir/{myid}/{userid}',		'Api\PostController@seguir');
 Route::post('/desseguir/{myid}/{userid}',	'Api\PostController@desseguir');
+
+Route::get('/comentarios/{my_id}/{post_id}',			'Api\PostController@comentarios');
+Route::post('/comentar/{post_id}/{my_id}/{texto}',		'Api\PostController@comentar');
