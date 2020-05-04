@@ -64,6 +64,8 @@ class PostController extends Controller
     }
     
     public function feed(Request $request){
+        $feed = array();
+
     	$seguidos = DB::table('seguidos')
     		->where('user_id', $request->id)
     		->first();
@@ -83,7 +85,49 @@ class PostController extends Controller
     		->orderBy('posts.created_at', 'desc')
     		->get();
 
-    	$responseData = array('data' => $posts);
+        foreach($posts as $p):
+            $post = array(
+                'id' => $p->user_id,
+                'user' => $p->user,
+                'img' => $p->user_img,
+                'post' => array(
+                    'id' => $p->id,
+                    'legenda' => $p->legenda,
+                    'img' => $p->img,
+                    'criado_em' => $p->created_at,
+                    'comentarios' => array()
+                )
+            );
+
+            $comentarios = DB::table('comentarios')
+                ->where('post_id', $p->id)
+                ->first();
+
+            $comentarios = unserialize($comentarios->dados);
+
+            foreach($comentarios['comentarios'] as $c):
+                $user = DB::table('users')
+                    ->where('id', $c['user_id'])
+                    ->first();
+
+                $comentario = array(
+                    'id' => $c['id'],
+                    'texto' => $c['texto'],
+                    'user' => array(
+                        'id' => $user->id,
+                        'user' => $user->user,
+                        'img' => $user->user_img
+                    )
+                );
+
+                array_push($post['post']['comentarios'], $comentario);
+            endforeach;
+
+            array_push($feed, $post);
+
+        endforeach;
+
+    	$responseData = array('data' => $feed);
 
     	return response()->json(compact('responseData'));
     }
