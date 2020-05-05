@@ -19,19 +19,23 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('/login', 									'Api\UserController@login');
+
 Route::post('/cadastrar', 								'Api\UserController@cadastrar');
 
-Route::get('/meu_perfil/{id}',							'Api\PostController@meu_perfil');
-Route::get('/feed/{my_id}',								'Api\PostController@feed');
+Route::get('/meu_perfil/{id}',							'Api\PerfilController@meu_perfil');
 
-Route::get('/buscar/{texto?}',							'Api\PostController@buscar');
+Route::get('/feed/{my_id}',								'Api\FeedController@feed');
 
-Route::get('/ver_perfil/{myid}/{userid}',				'Api\PostController@ver_perfil');
+Route::get('/buscar/{texto?}',							'Api\BuscarController@buscar');
 
-Route::post('/seguir/{myid}/{userid}',					'Api\PostController@seguir');
-Route::post('/desseguir/{myid}/{userid}',				'Api\PostController@desseguir');
+Route::get('/ver_perfil/{myid}/{userid}',				'Api\PerfilController@ver_perfil');
 
-Route::get('/comentarios/{my_id}/{post_id}',			'Api\PostController@comentarios');
-Route::post('/comentar/{post_id}/{user_id}/{texto}',	'Api\PostController@comentar');
+Route::post('/seguir/{myid}/{userid}',					'Api\SeguirController@seguir');
 
-Route::post('/like/{post_id}/{my_id}',					'Api\PostController@like');
+Route::post('/desseguir/{myid}/{userid}',				'Api\SeguirController@desseguir');
+
+Route::get('/comentarios/{my_id}/{post_id}',			'Api\ComentariosController@comentarios');
+
+Route::post('/comentar/{post_id}/{user_id}/{texto}',	'Api\ComentariosController@comentar');
+
+Route::post('/like/{post_id}/{my_id}',					'Api\LikeController@like');
