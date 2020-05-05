@@ -67,7 +67,7 @@ class FeedController extends Controller
 
                 $quantidade = count($comentarios);
 
-                foreach($comentarios as $c):
+                foreach($comentarios->slice(0, 2) as $c):
                     $c_criado_ha = date('d', (strtotime(date('Y-m-d')) - strtotime(date('Y-m-d', strtotime($c->created_at)))));
                     
                     $user = DB::table('users')
@@ -89,9 +89,9 @@ class FeedController extends Controller
                     ->where('post_id', $p->id)
                     ->first();
 
-                $likes = unserialize($likes->user_id);
+                $is_liked = unserialize($likes->user_id);
 
-                $user_in_array = in_array($request->my_id, $likes);
+                $is_liked = in_array($request->my_id, $is_liked);
 
                 $data['posts'][] = [
                     'id' => $p->id, 
@@ -103,7 +103,7 @@ class FeedController extends Controller
                         'username' => $p->user, 
                         'profile_pic_url' => $p->user_img
                     ],
-                    'is_liked' => $user_in_array,
+                    'is_liked' => $is_liked,
                     'comentarios_contagem' => $quantidade,
                     'comentarios' => $comentarios_dados
                 ];
