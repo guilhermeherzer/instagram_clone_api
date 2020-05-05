@@ -120,6 +120,8 @@ class PostController extends Controller
 
                 $comentarios_dados = array();
 
+                $quantidade = count($comentarios);
+
                 foreach($comentarios as $c):
                     $c_criado_ha = date('d', (strtotime(date('Y-m-d')) - strtotime(date('Y-m-d', strtotime($c->created_at)))));
                     
@@ -148,6 +150,7 @@ class PostController extends Controller
                         'username' => $p->user, 
                         'profile_pic_url' => $p->user_img
                     ],
+                    'comentarios_contagem' => $quantidade,
                     'comentarios' => $comentarios_dados
                 ];
             endforeach;
