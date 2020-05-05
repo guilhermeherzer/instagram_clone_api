@@ -89,9 +89,14 @@ class FeedController extends Controller
                     ->where('post_id', $p->id)
                     ->first();
 
-                $is_liked = unserialize($likes->user_id);
+                $likes = unserialize($likes->user_id);
+                
+                $is_liked = in_array($request->my_id, $likes);
 
-                $is_liked = in_array($request->my_id, $is_liked);
+                $user = DB::table('users')
+                	->select('user as username')
+                	->whereIn('id', $likes)
+                	->first();
 
                 $data['posts'][] = [
                     'id' => $p->id, 
@@ -104,6 +109,8 @@ class FeedController extends Controller
                         'profile_pic_url' => $p->user_img
                     ],
                     'is_liked' => $is_liked,
+                    'preview_likes' => $user,
+                    'count_likes' => count($likes),
                     'comentarios_contagem' => $quantidade,
                     'comentarios' => $comentarios_dados
                 ];
