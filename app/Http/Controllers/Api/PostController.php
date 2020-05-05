@@ -63,11 +63,12 @@ class PostController extends Controller
     	return response()->json(compact('responseData'));
     }
     
+    /* refactoring feito em 04/05/20 */
     public function feed(Request $request){
-        $feed = array();
+        $data = array();
 
     	$seguidos = DB::table('seguidos')
-    		->where('user_id', $request->id)
+    		->where('user_id', $request->my_id)
     		->first();
 
     	if($seguidos->lista_seguidos):
@@ -76,58 +77,84 @@ class PostController extends Controller
     		$lista_seguidos = array();
     	endif;
 
-    	array_push($lista_seguidos, intval($request->id));
-    	
-    	$posts = DB::table("posts")
-    		->select('posts.*', 'users.user', 'users.user_img')
-    		->leftJoin('users', 'users.id', 'posts.user_id')
-    		->whereIn('posts.user_id', $lista_seguidos)
-    		->orderBy('posts.created_at', 'desc')
-    		->get();
+        /* Informações para os Stories do Feed */
 
-        foreach($posts as $p):
-            $post = array(
-                'id' => $p->user_id,
-                'user' => $p->user,
-                'img' => $p->user_img,
-                'post' => array(
-                    'id' => $p->id,
-                    'legenda' => $p->legenda,
-                    'img' => $p->img,
-                    'criado_em' => $p->created_at,
-                    'comentarios' => array()
-                )
-            );
+        $user = DB::table('users')
+            ->select('id', 'user', 'user_img')
+            ->whereIn('id', $lista_seguidos)
+            ->get();
 
-            $comentarios = DB::table('comentarios')
-                ->where('post_id', $p->id)
-                ->first();
+        foreach($user as $u):
+            if(strlen($u->user) > 9):
+                $user_name = substr($u->user, 0, 9);
+                $user_name = $user_name."...";
+            else:
+                $user_name = $u->user;
+            endif;
 
-            $comentarios = unserialize($comentarios->dados);
-
-            foreach($comentarios['comentarios'] as $c):
-                $user = DB::table('users')
-                    ->where('id', $c['user_id'])
-                    ->first();
-
-                $comentario = array(
-                    'id' => $c['id'],
-                    'texto' => $c['texto'],
-                    'user' => array(
-                        'id' => $user->id,
-                        'user' => $user->user,
-                        'img' => $user->user_img
-                    )
-                );
-
-                array_push($post['post']['comentarios'], $comentario);
-            endforeach;
-
-            array_push($feed, $post);
-
+            $data['stories'][] = [
+                'id' => $u->id,
+                'user' => $user_name,
+                'user_img' => $u->user_img
+            ];
         endforeach;
 
-    	$responseData = array('data' => $feed);
+        /* Informações para os Posts do Feed */
+
+    	array_push($lista_seguidos, intval($request->my_id));
+
+        $posts = DB::table('posts')
+            ->select('users.id as user_id', 'users.user', 'users.user_img', 'posts.*')
+            ->leftJoin('users', 'users.id', 'posts.user_id')
+            ->whereIn('posts.user_id', $lista_seguidos)
+            ->orderBy('posts.created_at', 'desc')
+            ->get();
+
+        if($posts):
+            foreach($posts as $p):
+                $p_criado_ha = date('d', (strtotime(date('Y-m-d')) - strtotime(date('Y-m-d', strtotime($p->created_at)))));
+
+                $comentarios = DB::table('comentarios')
+                    ->where('post_id', $p->id)
+                    ->get();
+
+                $comentarios_dados = array();
+
+                foreach($comentarios as $c):
+                    $c_criado_ha = date('d', (strtotime(date('Y-m-d')) - strtotime(date('Y-m-d', strtotime($c->created_at)))));
+                    
+                    $user = DB::table('users')
+                        ->where('id', $c->user_id)
+                        ->first();
+
+                    $comentarios_dados[] = [
+                        'id' => $c->id,
+                        'texto' => $c->texto,
+                        'criado_ha' => $c_criado_ha,
+                        'user' => [
+                            'username' => $user->user,
+                            'profile_pic_url' => $user->user_img
+                        ]
+                    ];
+                endforeach;
+
+                $data['posts'][] = [
+                    'id' => $p->id, 
+                    'display_url' => $p->img, 
+                    'legenda' => $p->legenda, 
+                    'criado_ha' => $p_criado_ha, 
+                    'owner_post' => [
+                        'id' => $p->user_id,
+                        'username' => $p->user, 
+                        'profile_pic_url' => $p->user_img
+                    ],
+                    'comentarios' => $comentarios_dados
+                ];
+            endforeach;
+        else:
+        endif;
+
+    	$responseData = array('data' => $data);
 
     	return response()->json(compact('responseData'));
     }
@@ -340,84 +367,102 @@ class PostController extends Controller
     	return response()->json(compact('responseData'));
     }
 
+    /* refactoring feito em 04/05/20 */
     public function comentarios(Request $request){
-        $user_auth = DB::table('users')
-            ->where('id', $request->my_id)
-            ->first();
-
-        $user_auth = array('user_img' => $user_auth->user_img);
-
         $post = DB::table('posts')
             ->where('id', $request->post_id)
             ->first();
 
-        $user_post = DB::table('users')
+        $data = array(
+            'id' => $post->id, 
+            'legenda' => $post->legenda, 
+            'criado_ha' => ''
+        );
+
+        $user = DB::table('users')
+            ->select('id', 'name', 'user', 'user_img')
             ->where('id', $post->user_id)
             ->first();
 
-        $user_post = array('user' => $user_post->user, 'user_img' => $user_post->user_img);
+        $owner_post = array(
+            'id' => $user->id, 
+            'username' => $user->user, 
+            'profile_pic_url' => $user->user_img, 
+            'full_name' => $user->name
+        );
 
-        $post = array('legenda' => $post->legenda, 'user' => $user_post);
-
-        $comentarios_dados = array();
-
+        $data['owner_post'] = $owner_post;
+            
         $comentarios = DB::table('comentarios')
             ->where('post_id', $request->post_id)
+            ->get();
+
+        if($comentarios):
+            foreach($comentarios as $c):
+                $user = DB::table('users')
+                    ->select('id', 'user', 'user_img')
+                    ->where('id', $c->user_id)
+                    ->first();
+
+                $comentario = array(
+                    'id' => $c->id, 
+                    'texto' => $c->texto, 
+                    'criado_ha' => ''
+                );
+
+                $comentario['user'] = array(
+                    'id' => $user->id, 
+                    'username' => $user->user, 
+                    'profile_pic_url' => $user->user_img
+                );
+
+                $data['comentarios'][] = $comentario;
+            endforeach;
+        else:
+        endif;
+
+        $user = DB::table('users')
+            ->select('user_img')
+            ->where('id', $request->my_id)
             ->first();
 
-        $comentarios = unserialize($comentarios->dados);
+        $data['user_auth'] = array(
+            'profile_pic_url' => $user->user_img
+        );
 
-        foreach($comentarios['comentarios'] as $c):
-            $user = DB::table('users')
-                ->where('id', $c['user_id'])
-                ->first();
-
-            $user_dado = array('id' => $user->id, 'user' => $user->user, 'user_img' => $user->user_img);
-
-            $dado = array('id' => $c['id'], 'texto' => $c['texto'], 'criado_em' => '1', 'user' => $user_dado);
-
-            $comentario = array('comentario' => $dado);
-
-            array_push($comentarios_dados, $comentario);
-
-        endforeach;
-
-        $responseData = array('user_auth' => $user_auth, 'post' => $post, 'comentarios'=>$comentarios_dados);
+        $responseData = array(
+            'data' => $data
+        );
 
         return response()->json(compact('responseData'));
     }
 
+    /* refactoring feito em 04/05/20 */
     public function comentar(Request $request){
-        $comentarios = DB::table('comentarios')
-            ->where('post_id', $request->post_id)
+        $post = DB::table('posts')
+            ->where('id', $request->post_id)
             ->first();
 
-        $comentarios = unserialize($comentarios->dados);
-
-        $quantidade = count($comentarios['comentarios']) + 1;
-
-        $dado = array('id' => $quantidade, 'user_id' => intval($request->my_id), 'texto' => $request->texto);
-
-        array_push($comentarios['comentarios'], $dado);
-
-        $comentarios = serialize($comentarios);
-
-        if($comentarios):
-            $comentario_data = array(
-                'dados' => $comentarios,
+        if($post):
+            $comentario_dados = array(
+                'post_id' => $request->post_id,
+                'user_id' => $request->user_id,
+                'texto' => $request->texto,
+                'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             );
 
-            DB::table('comentarios')->where('post_id', $request->post_id)->update($comentario_data);
-            
-            $responseData = array('success'=>'1');
+            $comentario = DB::table('comentarios')->insert($comentario_dados);
+
+            if($comentario):
+                $responseData = array('success'=>'1');
+            else:
+                $responseData = array('success'=>'0');
+            endif;
         else:
-            $responseData = array('success'=>'0');
+                $responseData = array('success'=>'0');
         endif;
-        //$comentarios = serialize(array('comentarios' => array()));
-        //$responseData = array('data'=>$comentarios);
-
-
+        
         return response()->json(compact('responseData'));
     }
 }
