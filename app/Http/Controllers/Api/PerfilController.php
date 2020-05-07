@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -12,13 +13,13 @@ class PerfilController extends Controller
     public function meu_perfil(Request $request){
     	$user = DB::table('users')
     		->select('name', 'user', 'user_img')
-    		->where('id', $request->id)
+    		->where('id', auth()->user()->id)
     		->first();
 
     	/* Resgata todos os seguidores e faz a conta de quantos tem */
 
     	$seguidores = DB::table('seguidores')
-    		->where('user_id', $request->id)
+    		->where('user_id', auth()->user()->id)
     		->first();
 
     	if($seguidores->lista_seguidores):
@@ -31,7 +32,7 @@ class PerfilController extends Controller
     	/* Resgata todos os seguidos e faz a conta de quantos tem */
 
     	$seguidos = DB::table('seguidos')
-    		->where('user_id', $request->id)
+    		->where('user_id', auth()->user()->id)
     		->first();
 
     	if($seguidos->lista_seguidos):
@@ -44,13 +45,14 @@ class PerfilController extends Controller
     	/* Resgata todos os posts do usuário */
 
     	$posts = DB::table("posts")
-    		->where('user_id', $request->id)
+    		->where('user_id', auth()->user()->id)
     		->get();
 
     	$num_posts = count($posts);
 
     	$responseData = array(
     		'user' => $user, 
+            'teste' => auth()->user()->id,
     		'posts' => $posts, 
     		'num_posts' => $num_posts, 
     		'seguidores' => $seguidores,
@@ -135,7 +137,6 @@ class PerfilController extends Controller
 
     	$responseData = array(
     		'status_seguir' => $status_seguir,
-
     		'user' => $user, 
     		'posts' => $posts, 
     		'num_posts' => $num_posts, 
