@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
+use Illuminate\Support\Facades\Auth;
+
 use Hash;
 
 use DB;
@@ -33,12 +35,7 @@ class UserController extends Controller
                     return response()->json(['error' => 'could_not_create_token'], 500);
                 }
 
-                $userId = DB::table('users')
-                    ->select('id')
-                    ->where('email', '=', $email)
-                    ->first();
-
-                $responseData = array('success'=>'1', 'token'=>$token, 'data'=>$userId, 'message'=>"Logado com sucesso!");
+                $responseData = array('success'=>'1', 'token'=>$token, 'data'=>Auth::user(), 'message'=>"Logado com sucesso!");
             else:
                 $responseData = array('success'=>'0', 'message'=>"Senha incorreta!");
             endif;
