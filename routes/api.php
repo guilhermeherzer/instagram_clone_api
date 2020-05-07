@@ -36,6 +36,6 @@ use Illuminate\Support\Facades\Route;
 
 	Route::post('/comentar/{post_id}/{texto}',	'Api\ComentariosController@comentar');
 
-	Route::post('/like/{post_id}/{my_id}',					'Api\LikeController@like');
+	Route::post('/like/{post_id}',					'Api\LikeController@like');
 
 	Route::post('/publicar/upload-img',						'Api\PostController@upload_img');

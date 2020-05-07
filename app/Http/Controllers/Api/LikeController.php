@@ -16,10 +16,10 @@ class LikeController extends Controller
 
         $users = unserialize($likes->user_id);
 
-        $user_in_array = in_array($request->my_id, $users);
+        $user_in_array = in_array(auth()->user()->id, $users);
 
         if(!$user_in_array):
-                $users[] = intval($request->my_id);
+                $users[] = intval(auth()->user()->id);
 
                 $users = serialize($users);
 
@@ -36,7 +36,7 @@ class LikeController extends Controller
                     $responseData = array('success' => 0);
                 endif;
         else:
-                $users_id = array_search($request->my_id, $users);
+                $users_id = array_search(auth()->user()->id, $users);
 
                 array_splice($users, $users_id, 1);
 
