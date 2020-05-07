@@ -14,7 +14,7 @@ class SeguirController extends Controller
     	$user_auth = DB::table('users')
     		->select('users.name', 'users.user', 'users.user_img', 'seguidos.lista_seguidos')
     		->leftJoin('seguidos', 'seguidos.user_id', 'users.id')
-    		->where('users.id', $request->myid)
+    		->where('users.id', auth()->user()->id)
     		->first();
 
     	/* Verifica se o usuário auth já esta seguindo ou não */
@@ -39,15 +39,15 @@ class SeguirController extends Controller
     	endif;
 
     	/* Faz o teste para a validação dos dados */
-    	if(!in_array($request->userid, $seguidos) && !in_array($request->myid, $seguidores)):
+    	if(!in_array($request->userid, $seguidos) && !in_array(auth()->user()->id, $seguidores)):
     		array_push($seguidos, intval($request->userid));
     		$seguidos = serialize($seguidos);
 
-    		array_push($seguidores, intval($request->myid));
+    		array_push($seguidores, intval(auth()->user()->id));
     		$seguidores = serialize($seguidores);
 
     		$seguidos_data = array(
-    			'user_id' => $request->myid,
+    			'user_id' => auth()->user()->id,
     			'lista_seguidos' => $seguidos,
     		);
 
@@ -56,7 +56,7 @@ class SeguirController extends Controller
     			'lista_seguidores' => $seguidores,
     		);
 
-    		$seguidos = DB::table('seguidos')->where('user_id', $request->myid)->update($seguidos_data);
+    		$seguidos = DB::table('seguidos')->where('user_id', auth()->user()->id)->update($seguidos_data);
     		$seguidores = DB::table('seguidores')->where('user_id', $request->userid)->update($seguidores_data);
 
     		if($seguidos && $seguidores):
@@ -72,7 +72,7 @@ class SeguirController extends Controller
     public function desseguir(Request $request){
     	$user_auth = DB::table('users')
     		->leftJoin('seguidos', 'seguidos.user_id', 'users.id')
-    		->where('users.id', $request->myid)
+    		->where('users.id', auth()->user()->id)
     		->first();
 
     	$seguidos = unserialize($user_auth->lista_seguidos);
@@ -84,8 +84,8 @@ class SeguirController extends Controller
 
     	$seguidores = unserialize($user->lista_seguidores);
 
-    	if(in_array($request->userid, $seguidos) && in_array($request->myid, $seguidores)):
-    		$myid = intval(array_search($request->myid, $seguidores));
+    	if(in_array($request->userid, $seguidos) && in_array(auth()->user()->id, $seguidores)):
+    		$myid = intval(array_search(auth()->user()->id, $seguidores));
     		$userid = intval(array_search($request->userid, $seguidos));
 
     		array_splice($seguidores, $myid, 1);
@@ -102,7 +102,7 @@ class SeguirController extends Controller
     			'lista_seguidores' => $seguidores
     		);
 
-    		$seguidos = DB::table('seguidos')->where('user_id', $request->myid)->update($seguidos_data);
+    		$seguidos = DB::table('seguidos')->where('user_id', auth()->user()->id)->update($seguidos_data);
     		$seguidores = DB::table('seguidores')->where('user_id', $request->userid)->update($seguidores_data);
 
     		if($seguidos && $seguidores):
