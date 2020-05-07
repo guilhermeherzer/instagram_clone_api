@@ -95,10 +95,11 @@ class ComentariosController extends Controller
             $comentario = DB::table('comentarios')->insert($comentario_dados);
 
             if($comentario):
-                $responseData = array('success'=>'1');
+                return redirect('api/comentarios/'.$request->user_id.'/'.$request->post_id);
             else:
                 $responseData = array('success'=>'0');
             endif;
+
         else:
                 $responseData = array('success'=>'0');
         endif;
