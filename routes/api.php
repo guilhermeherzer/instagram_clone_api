@@ -39,3 +39,5 @@ Route::get('/comentarios/{my_id}/{post_id}',			'Api\ComentariosController@coment
 Route::post('/comentar/{post_id}/{user_id}/{texto}',	'Api\ComentariosController@comentar');
 
 Route::post('/like/{post_id}/{my_id}',					'Api\LikeController@like');
+
+Route::post('/publicar/upload-img',						'Api\PostController@upload_img');
