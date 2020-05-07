@@ -32,9 +32,9 @@ use Illuminate\Support\Facades\Route;
 
 	Route::post('/desseguir/{userid}',				'Api\SeguirController@desseguir');
 
-	Route::get('/comentarios/{my_id}/{post_id}',			'Api\ComentariosController@comentarios');
+	Route::get('/comentarios/{post_id}',			'Api\ComentariosController@comentarios');
 
-	Route::post('/comentar/{post_id}/{user_id}/{texto}',	'Api\ComentariosController@comentar');
+	Route::post('/comentar/{post_id}/{texto}',	'Api\ComentariosController@comentar');
 
 	Route::post('/like/{post_id}/{my_id}',					'Api\LikeController@like');
 

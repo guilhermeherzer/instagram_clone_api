@@ -64,7 +64,7 @@ class ComentariosController extends Controller
 
         $user = DB::table('users')
             ->select('user_img')
-            ->where('id', $request->my_id)
+            ->where('id', auth()->user()->id)
             ->first();
 
         $data['user_auth'] = array(
@@ -86,7 +86,7 @@ class ComentariosController extends Controller
         if($post):
             $comentario_dados = array(
                 'post_id' => $request->post_id,
-                'user_id' => $request->user_id,
+                'user_id' => auth()->user()->id,
                 'texto' => $request->texto,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
@@ -95,7 +95,7 @@ class ComentariosController extends Controller
             $comentario = DB::table('comentarios')->insert($comentario_dados);
 
             if($comentario):
-                return redirect('api/comentarios/'.$request->user_id.'/'.$request->post_id);
+                return redirect('api/comentarios/'.$request->post_id);
             else:
                 $responseData = array('success'=>'0');
             endif;
