@@ -69,7 +69,7 @@ class PerfilController extends Controller
     	$user_auth = DB::table('users')
     		->select('users.name', 'users.user', 'users.user_img', 'seguidos.lista_seguidos')
     		->leftJoin('seguidos', 'seguidos.user_id', 'users.id')
-    		->where('users.id', $request->myid)
+    		->where('users.id', auth()->user()->id)
     		->first();
 
     	/* Verifica se o usuário já esta sendo seguido ou não */
@@ -102,17 +102,17 @@ class PerfilController extends Controller
 
     	/* Faz os testes para ver o status */
     	
-    	if(in_array($request->userid, $seguidos_auth) && in_array($request->myid, $seguidores)):
+    	if(in_array($request->userid, $seguidos_auth) && in_array(auth()->user()->id, $seguidores)):
     		$status_seguir = array(
     			'id' => 1,
     			'texto' => "Seguindo"
     		);
-    	elseif(!in_array($request->userid, $seguidos_auth) && in_array($request->myid, $seguidos) && !in_array($request->myid, $seguidores)):
+    	elseif(!in_array($request->userid, $seguidos_auth) && in_array(auth()->user()->id, $seguidos) && !in_array(auth()->user()->id, $seguidores)):
     		$status_seguir = array(
     			'id' => 2,
     			'texto' => "Seguir de Volta"
     		);
-    	elseif(in_array($request->userid, $seguidos_auth) && !in_array($request->myid, $seguidos) && in_array($request->myid, $seguidores)):
+    	elseif(in_array($request->userid, $seguidos_auth) && !in_array(auth()->user()->id, $seguidos) && in_array(auth()->user()->id, $seguidores)):
     		$status_seguir = array(
     			'id' => 1,
     			'texto' => "Seguindo"
