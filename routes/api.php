@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Route;
 
 	Route::get('/meu_perfil/',								'Api\PerfilController@meu_perfil');
 
-	Route::get('/feed/{my_id}',								'Api\FeedController@feed');
+	Route::get('/feed/',								'Api\FeedController@feed');
 
 	Route::get('/buscar/{texto?}',							'Api\BuscarController@buscar');
 

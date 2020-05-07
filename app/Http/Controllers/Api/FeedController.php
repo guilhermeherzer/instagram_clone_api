@@ -13,7 +13,7 @@ class FeedController extends Controller
         $data = array();
 
     	$seguidos = DB::table('seguidos')
-    		->where('user_id', $request->my_id)
+    		->where('user_id', auth()->user()->id)
     		->first();
 
     	if($seguidos->lista_seguidos):
@@ -46,7 +46,7 @@ class FeedController extends Controller
 
         /* Informações para os Posts do Feed */
 
-    	array_push($lista_seguidos, intval($request->my_id));
+    	array_push($lista_seguidos, intval(auth()->user()->id));
 
         $posts = DB::table('posts')
             ->select('users.id as user_id', 'users.user', 'users.user_img', 'posts.*')
@@ -91,7 +91,7 @@ class FeedController extends Controller
 
                 $likes = unserialize($likes->user_id);
                 
-                $is_liked = in_array($request->my_id, $likes);
+                $is_liked = in_array(auth()->user()->id, $likes);
 
                 $user = DB::table('users')
                 	->select('user as username')
