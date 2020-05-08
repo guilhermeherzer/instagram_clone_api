@@ -29,7 +29,7 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        $responseData = array('success'=>'1', 'token'=>$token, 'data'=>auth()->user(), 'message'=>"Logado com sucesso!");
+        $responseData = array('success'=>'1', 'token'=>$token, 'user'=>auth()->user(), 'message'=>"Logado com sucesso!");
 
         return response()->json(compact('responseData'));
     }
