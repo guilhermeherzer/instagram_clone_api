@@ -85,11 +85,7 @@ class FeedController extends Controller
                     ];
                 endforeach;
 
-                $likes = DB::table('likes')
-                    ->where('post_id', $p->id)
-                    ->first();
-
-                $likes = unserialize($likes->user_id);
+                $likes = unserialize($p->likes);
                 
                 $is_liked = in_array(auth()->user()->id, $likes);
 

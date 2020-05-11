@@ -10,11 +10,15 @@ use DB;
 class LikeController extends Controller
 {
     public function like(Request $request){
-        $likes = DB::table('likes')
+        /*$likes = DB::table('likes')
             ->where('post_id', $request->post_id)
+            ->first();*/
+
+        $post = DB::table('posts')
+            ->where('id', $request->post_id)
             ->first();
 
-        $users = unserialize($likes->user_id);
+        $users = unserialize($post->likes);
 
         $user_in_array = in_array(auth()->user()->id, $users);
 
@@ -24,11 +28,11 @@ class LikeController extends Controller
                 $users = serialize($users);
 
                 $like_dados = array(
-                    'user_id' => $users,
+                    'likes' => $users,
                     'updated_at' => date('Y-m-d H:i:s')
                 );
 
-                $like = DB::table('likes')->where('post_id', $request->post_id)->update($like_dados);
+                $like = DB::table('posts')->where('id', $request->post_id)->update($like_dados);
 
                 if($like):
                     $responseData = array('success' => 1, 'is_liked' => true);
@@ -43,11 +47,11 @@ class LikeController extends Controller
                 $users = serialize($users);
 
                 $like_dados = array(
-                    'user_id' => $users,
+                    'likes' => $users,
                     'updated_at' => date('Y-m-d H:i:s')
                 );
 
-                $like = DB::table('likes')->where('post_id', $request->post_id)->update($like_dados);
+                $like = DB::table('posts')->where('id', $request->post_id)->update($like_dados);
 
                 if($like):
                     $responseData = array('success' => 1, 'is_liked' => false);
