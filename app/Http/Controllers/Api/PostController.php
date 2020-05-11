@@ -41,8 +41,8 @@ class PostController extends Controller
 			endif;
 
 	    	// Check file size
-			if ($_FILES["photo"]["size"] > 500000):
-				echo "Sorry, your file is too large.";
+			if ($_FILES["photo"]["size"] > 5000000):
+				echo $_FILES["photo"]["size"];
 				$uploadOk = 0;
 			endif;
 
@@ -64,13 +64,14 @@ class PostController extends Controller
 						'img' => $target_file,
 						'localizacao' => '',
 						'pessoas_marcadas' => '',
+						'likes' => serialize(array()),
 						'created_at' => date('Y-m-d H:i:s'),
 						'updated_at' => date('Y-m-d H:i:s')
 					);
 
 					$post = DB::table('posts')->insert($post_data);
 
-					$responseData = array('success'=>'1', 'message'=>"The file ". $_FILES["photo"]["size"]. " has been uploaded.");
+					$responseData = array('success'=>'1', 'message'=>"Postagem feita com sucesso!");
 				else:
 					$responseData = array('success'=>'0', 'message'=>"Sorry, there was an error uploading your file.");
 				endif;
