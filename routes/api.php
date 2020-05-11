@@ -38,4 +38,4 @@ use Illuminate\Support\Facades\Route;
 
 	Route::post('/like/{post_id}',							'Api\LikeController@like');
 
-	Route::post('/publicar/upload-img',						'Api\PostController@upload_img');
+	Route::post('/publicar/{legenda?}',						'Api\PostController@publicar');

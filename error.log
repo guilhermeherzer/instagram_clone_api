@@ -1,1 +1,2 @@
 [Thu Apr 30 22:17:06.355519 2020] [php7:warn] [pid 3144:tid 1872] [client ::1:54981] PHP Warning:  Unterminated comment starting line 318 in C:\\Users\\Guilherme Rosa\\PHP\\mejuana_api\\app\\Http\\Controllers\\Api\\PostController.php on line 318
+[Fri May 08 16:47:06.166370 2020] [php7:warn] [pid 12564:tid 1888] [client 192.168.0.127:54057] PHP Warning:  Missing boundary in multipart/form-data POST data in Unknown on line 0
