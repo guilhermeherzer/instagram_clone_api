@@ -35,15 +35,6 @@ class AuthController extends Controller
     }
 
     /**
-     * Get the authenticated User.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function me() {
-        return response()->json(auth()->user());
-    }
-
-    /**
      * Log the user out (Invalidate the token).
      *
      * @return \Illuminate\Http\JsonResponse
@@ -51,7 +42,18 @@ class AuthController extends Controller
     public function logout() {
         auth()->logout();
 
-        return response()->json(['message' => 'Successfully logged out']);
+        $responseData = array('success'=>'1', 'message'=>"Usuário deslogado com sucesso!");
+
+        return response()->json(compact('responseData'));
+    }
+
+    /**
+     * Get the authenticated User.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function me() {
+        return response()->json(auth()->user());
     }
 
     /**

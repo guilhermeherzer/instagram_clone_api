@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 
 	Route::post('/cadastrar', 								'Api\AuthController@cadastrar');
 
-	Route::post('/me', 										'Api\AuthController@me');
+	Route::post('/logout', 									'Api\AuthController@logout');
 
 	Route::get('/meu_perfil/',								'Api\PerfilController@meu_perfil');
 
