@@ -39,3 +39,5 @@ use Illuminate\Support\Facades\Route;
 	Route::post('/like/{post_id}',							'Api\LikeController@like');
 
 	Route::post('/publicar/{legenda?}',						'Api\PostController@publicar');
+
+	Route::post('/publicar/delete/{post_id}',				'Api\PostController@delete');

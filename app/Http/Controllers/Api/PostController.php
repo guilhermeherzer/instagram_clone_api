@@ -83,4 +83,26 @@ class PostController extends Controller
 
 		return response()->json(compact('responseData'));
 	}
+
+	public function delete(Request $request) {
+		$post = DB::table('posts')
+			->where('id', $request->post_id)
+			->first();
+
+		if($post->user_id == 1):
+			$post = DB::table('posts')->where('id', $request->post_id)->delete();
+
+			if($post):
+				$responseData = array('success'=>'1', 'message'=>"Sucesso ao deletar a postagem");
+			else:
+				$responseData = array('success'=>'0', 'message'=>"Erro ao deletar a postagem!");
+			endif;
+		else:
+			$responseData = array('success'=>'0', 'message'=>"Erro ao deletar a postagem!");
+		endif;
+
+		return response()->json(compact('responseData'));
+	}
+
+
 }
