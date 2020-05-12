@@ -46,6 +46,7 @@ class PerfilController extends Controller
 
     	$posts = DB::table("posts")
     		->where('user_id', auth()->user()->id)
+            ->orderBy('created_at', 'desc')
     		->get();
 
     	$num_posts = count($posts);
