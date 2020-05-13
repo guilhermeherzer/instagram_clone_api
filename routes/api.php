@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Route;
 
 		Route::get('/buscar/{texto?}',							'Api\BuscarController@buscar');
 
-		Route::get('/ver_perfil/{userid}',						'Api\PerfilController@ver_perfil');
+		Route::get('/ver_perfil/{id}',							'Api\PerfilController@ver_perfil');
 
 		Route::post('/seguir/{userid}',							'Api\SeguirController@seguir');
 

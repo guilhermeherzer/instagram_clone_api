@@ -66,84 +66,58 @@ class PerfilController extends Controller
     }
 
     public function ver_perfil(Request $request){
-    	/* Resgata as informações do usuário */
-    	$user_auth = DB::table('users')
-    		->select('users.name', 'users.user', 'users.user_img', 'seguidos.lista_seguidos')
-    		->leftJoin('seguidos', 'seguidos.user_id', 'users.id')
-    		->where('users.id', auth()->user()->id)
-    		->first();
+        $user = DB::table('users')
+            ->leftJoin('seguidos', 'seguidos.user_id', 'users.id')
+            ->leftJoin('seguidores', 'seguidores.user_id', 'users.id')
+            ->where('users.id', $request->id)
+            ->first();
 
-    	/* Verifica se o usuário já esta sendo seguido ou não */
-		if($user_auth->lista_seguidos):
-	    	$seguidos_auth = unserialize($user_auth->lista_seguidos);
-	    else:
-	    	$seguidos_auth = array();
-	    endif;
+        $follow_status = in_array(auth()->user()->id, unserialize($user->lista_seguidores));
 
-    	/* Resgata as informações do usuário */
-    	$user = DB::table('users')
-    		->select('users.name', 'users.user', 'users.user_img', 'seguidores.lista_seguidores', 'seguidos.lista_seguidos')
-    		->leftJoin('seguidores', 'seguidores.user_id', 'users.id')
-    		->leftJoin('seguidos', 'seguidos.user_id', 'users.id')
-    		->where('users.id', $request->userid)
-    		->first();
+        $posts = DB::table('posts')
+            ->where('user_id', $request->id)
+            ->get();
 
-    	/* Verifica se o usuário já esta sendo seguido ou não */
-    	if($user->lista_seguidores):
-	    	$seguidores = unserialize($user->lista_seguidores);
-	    else:
-	    	$seguidores = array();
-	    endif;
+        $edges = array();
 
-	    if($user->lista_seguidos):
-	    	$seguidos = unserialize($user->lista_seguidos);
-	    else:
-	    	$seguidos = array();
-	    endif;
+        foreach($posts as $p):
+            $edges[] = [
+                "node" => [
+                    "id" => $p->id,
+                    "display_url" => $p->display_url,
+                    "owner" => [
+                        "id" => $user->id,
+                        "username"=> $user->username
+                    ],
+                    "text" => $p->text,
+                    "edge_media_to_comment" => [
+                        "count" => 3
+                    ],
+                    "location" => $p->location,
+                ]
+            ];
+        endforeach;
 
-    	/* Faz os testes para ver o status */
-    	
-    	if(in_array($request->userid, $seguidos_auth) && in_array(auth()->user()->id, $seguidores)):
-    		$status_seguir = array(
-    			'id' => 1,
-    			'texto' => "Seguindo"
-    		);
-    	elseif(!in_array($request->userid, $seguidos_auth) && in_array(auth()->user()->id, $seguidos) && !in_array(auth()->user()->id, $seguidores)):
-    		$status_seguir = array(
-    			'id' => 2,
-    			'texto' => "Seguir de Volta"
-    		);
-    	elseif(in_array($request->userid, $seguidos_auth) && !in_array(auth()->user()->id, $seguidos) && in_array(auth()->user()->id, $seguidores)):
-    		$status_seguir = array(
-    			'id' => 1,
-    			'texto' => "Seguindo"
-    		);
-    	else:
-    		$status_seguir = array(
-    			'id' => 0,
-    			'texto' => "Seguir"
-    		);
-    	endif;
-
-    	/* Resgata todos os posts do usuário */
-    	$posts = DB::table('posts')
-    		->where('user_id', $request->userid)
-    		->get();
-
-    	$num_posts = count($posts);
-
-    	$num_seguidos = count($seguidos);
-
-    	$num_seguidores = count($seguidores);
-
-    	$responseData = array(
-    		'status_seguir' => $status_seguir,
-    		'user' => $user, 
-    		'posts' => $posts, 
-    		'num_posts' => $num_posts, 
-    		'num_seguidores' => $num_seguidores, 
-    		'num_seguidos' => $num_seguidos
-    	);
+    	$responseData = [
+            "follow_status" => $follow_status,
+            "user" => [
+                "id" => $user->id,
+                "profile_pic_url" => $user->profile_pic_url,
+                "username" => $user->username,
+                "full_name" => $user->full_name,
+                "biography" => $user->biography,
+                "edge_followed_by" => [
+                    "count" => count(unserialize($user->lista_seguidores))
+                ],
+                "edge_follow" => [
+                    "count" => count(unserialize($user->lista_seguidos))
+                ],
+                "posts" => [
+                    "count" => count($posts),
+                    "edges" => $edges
+                ]
+            ]
+    	];
 
     	return response()->json(compact('responseData'));
     }
