@@ -60,9 +60,9 @@ class PostController extends Controller
 				if (move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file)):
 					$post_data = array(
 						'user_id' => auth()->user()->id,
-						'legenda' => $request->legenda,
-						'img' => $target_file,
-						'localizacao' => '',
+						'text' => $request->legenda,
+						'display_url' => $target_file,
+						'location' => '',
 						'pessoas_marcadas' => '',
 						'likes' => serialize(array()),
 						'created_at' => date('Y-m-d H:i:s'),
