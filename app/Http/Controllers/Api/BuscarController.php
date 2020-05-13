@@ -12,8 +12,8 @@ class BuscarController extends Controller
     public function buscar(Request $request){
     	if(!is_null($request->texto)):
 	    	$users = DB::table('users')
-	    		->select('id', 'name', 'user', 'user_img')
-	    		->where('user', 'LIKE', $request->texto.'%')
+	    		->select('id', 'full_name', 'username', 'profile_pic_url')
+	    		->where('username', 'LIKE', '%'.$request->texto.'%')
 	    		->get();
     	else:
     		$users = array();
