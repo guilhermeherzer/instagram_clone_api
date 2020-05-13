@@ -11,68 +11,46 @@ class ComentariosController extends Controller
 {
     public function comentarios(Request $request){
         $post = DB::table('posts')
-            ->where('id', $request->post_id)
+            ->select('users.*', 'users.id as userId', 'posts.*', 'posts.id as postId')
+            ->leftJoin('users', 'users.id', 'posts.user_id')
+            ->where('posts.id', $request->id)
             ->first();
 
-        $data = array(
-            'id' => $post->id, 
-            'legenda' => $post->legenda, 
-            'criado_ha' => ''
-        );
-
-        $user = DB::table('users')
-            ->select('id', 'name', 'user', 'user_img')
-            ->where('id', $post->user_id)
-            ->first();
-
-        $owner_post = array(
-            'id' => $user->id, 
-            'username' => $user->user, 
-            'profile_pic_url' => $user->user_img, 
-            'full_name' => $user->name
-        );
-
-        $data['owner_post'] = $owner_post;
-            
-        $comentarios = DB::table('comentarios')
-            ->where('post_id', $request->post_id)
+        $comments = DB::table('comentarios')
+            ->select('users.*', 'users.id as userId', 'comentarios.*', 'comentarios.id as comentarioId')
+            ->leftJoin('users', 'users.id', 'comentarios.user_id')
+            ->where('post_id', $request->id)
             ->get();
 
-        if($comentarios):
-            foreach($comentarios as $c):
-                $user = DB::table('users')
-                    ->select('id', 'user', 'user_img')
-                    ->where('id', $c->user_id)
-                    ->first();
+        $nodes = array();
 
-                $comentario = array(
-                    'id' => $c->id, 
-                    'texto' => $c->texto, 
-                    'criado_ha' => ''
-                );
-
-                $comentario['user'] = array(
-                    'id' => $user->id, 
-                    'username' => $user->user, 
-                    'profile_pic_url' => $user->user_img
-                );
-
-                $data['comentarios'][] = $comentario;
-            endforeach;
-        else:
-        endif;
-
-        $user = DB::table('users')
-            ->select('user_img')
-            ->where('id', auth()->user()->id)
-            ->first();
-
-        $data['user_auth'] = array(
-            'profile_pic_url' => $user->user_img
-        );
+        foreach($comments as $c):
+            $nodes[] = [
+                "node" => [
+                    "id" => $c->comentarioId,
+                    "text" => $c->texto,
+                    "owner" => [
+                        "id" => $c->userId,
+                        "profile_pic_url" => $c->profile_pic_url,
+                        "username" => $c->username
+                    ],
+                ]
+            ];
+        endforeach;
 
         $responseData = array(
-            'data' => $data
+            "id" => $post->postId,
+            "text" => $post->text,
+            "owner" => [
+                "id" => $post->userId,
+                "profile_pic_url" => $post->profile_pic_url,
+                "username" => $post->username,
+                "full_name" => $post->full_name,
+            ],
+            "comments" => [
+                "count" => count($comments),
+                "edges" => $nodes
+            ]
         );
 
         return response()->json(compact('responseData'));
@@ -80,12 +58,12 @@ class ComentariosController extends Controller
 
     public function comentar(Request $request){
         $post = DB::table('posts')
-            ->where('id', $request->post_id)
+            ->where('id', $request->id)
             ->first();
 
         if($post):
             $comentario_dados = array(
-                'post_id' => $request->post_id,
+                'post_id' => $request->id,
                 'user_id' => auth()->user()->id,
                 'texto' => $request->texto,
                 'created_at' => date('Y-m-d H:i:s'),
@@ -95,7 +73,7 @@ class ComentariosController extends Controller
             $comentario = DB::table('comentarios')->insert($comentario_dados);
 
             if($comentario):
-                return redirect('api/comentarios/'.$request->post_id);
+                return redirect('api/comentarios/'.$request->id);
             else:
                 $responseData = array('success'=>'0');
             endif;
