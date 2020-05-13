@@ -12,7 +12,7 @@ class SeguirController extends Controller
     public function seguir(Request $request){
     	/* Resgata as informações do usuário auth */
     	$user_auth = DB::table('users')
-    		->select('users.name', 'users.user', 'users.user_img', 'seguidos.lista_seguidos')
+    		->select('users.full_name', 'users.username', 'users.profile_pic_url', 'seguidos.lista_seguidos')
     		->leftJoin('seguidos', 'seguidos.user_id', 'users.id')
     		->where('users.id', auth()->user()->id)
     		->first();
@@ -26,9 +26,9 @@ class SeguirController extends Controller
 
     	/* Resgata as informações do usuário */
     	$user = DB::table('users')
-    		->select('users.name', 'users.user', 'users.user_img', 'seguidores.lista_seguidores')
+    		->select('users.full_name', 'users.username', 'users.profile_pic_url', 'seguidores.lista_seguidores')
     		->leftJoin('seguidores', 'seguidores.user_id', 'users.id')
-    		->where('users.id', $request->userid)
+    		->where('users.id', $request->id)
     		->first();
 
     	/* Verifica se o usuário já esta sendo seguido ou não */
@@ -39,8 +39,8 @@ class SeguirController extends Controller
     	endif;
 
     	/* Faz o teste para a validação dos dados */
-    	if(!in_array($request->userid, $seguidos) && !in_array(auth()->user()->id, $seguidores)):
-    		array_push($seguidos, intval($request->userid));
+    	if(!in_array($request->id, $seguidos) && !in_array(auth()->user()->id, $seguidores)):
+    		array_push($seguidos, intval($request->id));
     		$seguidos = serialize($seguidos);
 
     		array_push($seguidores, intval(auth()->user()->id));
@@ -52,12 +52,12 @@ class SeguirController extends Controller
     		);
 
     		$seguidores_data = array(
-    			'user_id' => $request->userid,
+    			'user_id' => $request->id,
     			'lista_seguidores' => $seguidores,
     		);
 
     		$seguidos = DB::table('seguidos')->where('user_id', auth()->user()->id)->update($seguidos_data);
-    		$seguidores = DB::table('seguidores')->where('user_id', $request->userid)->update($seguidores_data);
+    		$seguidores = DB::table('seguidores')->where('user_id', $request->id)->update($seguidores_data);
 
     		if($seguidos && $seguidores):
     			$responseData = array('success'=>'1', 'message'=>"Seguindo com sucesso!");
@@ -79,14 +79,14 @@ class SeguirController extends Controller
 
     	$user = DB::table('users')
     		->leftJoin('seguidores', 'seguidores.user_id', 'users.id')
-    		->where('users.id', $request->userid)
+    		->where('users.id', $request->id)
     		->first();
 
     	$seguidores = unserialize($user->lista_seguidores);
 
-    	if(in_array($request->userid, $seguidos) && in_array(auth()->user()->id, $seguidores)):
+    	if(in_array($request->id, $seguidos) && in_array(auth()->user()->id, $seguidores)):
     		$myid = intval(array_search(auth()->user()->id, $seguidores));
-    		$userid = intval(array_search($request->userid, $seguidos));
+    		$userid = intval(array_search($request->id, $seguidos));
 
     		array_splice($seguidores, $myid, 1);
     		array_splice($seguidos, $userid, 1);
@@ -103,16 +103,17 @@ class SeguirController extends Controller
     		);
 
     		$seguidos = DB::table('seguidos')->where('user_id', auth()->user()->id)->update($seguidos_data);
-    		$seguidores = DB::table('seguidores')->where('user_id', $request->userid)->update($seguidores_data);
+    		$seguidores = DB::table('seguidores')->where('user_id', $request->id)->update($seguidores_data);
 
     		if($seguidos && $seguidores):
-    			$success = 1;
+    			$success = '1';
     		else:
-    			$success = 0;
+    			$success = '0';
     		endif;
 
     		$responseData = array('success'=>$success);
     	else:
+            $responseData = array('success'=>'0');
     	endif;
 
     	return response()->json(compact('responseData'));

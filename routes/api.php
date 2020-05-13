@@ -31,9 +31,9 @@ use Illuminate\Support\Facades\Route;
 
 		Route::get('/ver_perfil/{id}',							'Api\PerfilController@ver_perfil');
 
-		Route::post('/seguir/{userid}',							'Api\SeguirController@seguir');
+		Route::post('/seguir/{id}',								'Api\SeguirController@seguir');
 
-		Route::post('/desseguir/{userid}',						'Api\SeguirController@desseguir');
+		Route::post('/desseguir/{id}',							'Api\SeguirController@desseguir');
 
 		Route::get('/comentarios/{post_id}',					'Api\ComentariosController@comentarios');
 
