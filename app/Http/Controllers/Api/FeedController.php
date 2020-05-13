@@ -26,22 +26,22 @@ class FeedController extends Controller
         /* Informações para os Stories do Feed */
 
         $user = DB::table('users')
-            ->select('id', 'user', 'user_img')
+            ->select('id', 'username', 'profile_pic_url')
             ->whereIn('id', $lista_seguidos)
             ->get();
 
         foreach($user as $u):
-            if(strlen($u->user) > 9):
-                $user_name = substr($u->user, 0, 9);
+            if(strlen($u->username) > 9):
+                $user_name = substr($u->username, 0, 9);
                 $user_name = $user_name."...";
             else:
-                $user_name = $u->user;
+                $user_name = $u->username;
             endif;
 
             $data['stories'][] = [
                 'id' => $u->id,
                 'user' => $user_name,
-                'user_img' => $u->user_img
+                'user_img' => $u->profile_pic_url
             ];
         endforeach;
 
@@ -50,7 +50,7 @@ class FeedController extends Controller
     	array_push($lista_seguidos, intval(auth()->user()->id));
 
         $posts = DB::table('posts')
-            ->select('users.id as user_id', 'users.user', 'users.user_img', 'posts.*')
+            ->select('users.id as user_id', 'users.username', 'users.profile_pic_url', 'posts.*')
             ->leftJoin('users', 'users.id', 'posts.user_id')
             ->whereIn('posts.user_id', $lista_seguidos)
             ->orderBy('posts.created_at', 'desc')
@@ -80,8 +80,8 @@ class FeedController extends Controller
                         'texto' => $c->texto,
                         'criado_ha' => $c_criado_ha,
                         'user' => [
-                            'username' => $user->user,
-                            'profile_pic_url' => $user->user_img
+                            'username' => $user->username,
+                            'profile_pic_url' => $user->profile_pic_url
                         ]
                     ];
                 endforeach;
@@ -91,19 +91,19 @@ class FeedController extends Controller
                 $is_liked = in_array(auth()->user()->id, $likes);
 
                 $user = DB::table('users')
-                	->select('user as username')
+                	->select('username')
                 	->whereIn('id', $likes)
                 	->first();
 
                 $data['posts'][] = [
                     'id' => $p->id, 
-                    'display_url' => $p->img, 
-                    'legenda' => $p->legenda, 
+                    'display_url' => $p->display_url, 
+                    'legenda' => $p->text, 
                     'criado_ha' => $p_criado_ha, 
                     'owner_post' => [
                         'id' => $p->user_id,
-                        'username' => $p->user, 
-                        'profile_pic_url' => $p->user_img
+                        'username' => $p->username, 
+                        'profile_pic_url' => $p->profile_pic_url
                     ],
                     'is_liked' => $is_liked,
                     'preview_likes' => $user,
