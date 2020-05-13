@@ -86,11 +86,11 @@ class PostController extends Controller
 
 	public function delete(Request $request) {
 		$post = DB::table('posts')
-			->where('id', $request->post_id)
+			->where('id', $request->id)
 			->first();
 
 		if($post->user_id == 1):
-			if(unlink($post->img) && DB::table('posts')->where('id', $request->post_id)->delete()):
+			if(unlink($post->display_url) && DB::table('posts')->where('id', $request->id)->delete()):
 				$responseData = array('success'=>'1', 'message'=>"Sucesso ao deletar a postagem");
 			else:
 				$responseData = array('success'=>'0', 'message'=>"Erro ao deletar a postagem!");
