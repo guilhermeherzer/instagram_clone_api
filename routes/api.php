@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Route;
 
 	Route::group(['middleware' => ['apiJwt']], function(){
 		Route::post('/logout', 									'Api\AuthController@logout');
+		
+		Route::post('/me', 										'Api\AuthController@me');
 
 		Route::get('/meu_perfil/',								'Api\PerfilController@meu_perfil');
 
