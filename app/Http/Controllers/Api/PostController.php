@@ -17,6 +17,7 @@ class PostController extends Controller
 		$name = Hash::make(date('Y-m-d H:i:s'));
 
 		if($request->hasFile('photo')):
+			$image = imagecreatefromjpeg($_FILES["photo"]["tmp_name"]);
 			$target_dir = "assets/img/posts/users/" . auth()->user()->id . "/";
 			$target_file = $target_dir . basename($name) . '.jpg';
 			$uploadOk = 1;
@@ -57,7 +58,7 @@ class PostController extends Controller
 				echo "Sorry, your file was not uploaded.";
 			// if everything is ok, try to upload file
 			else:
-				if (move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file)):
+				if (imagejpeg($image, $target_file, 50)):
 					$post_data = array(
 						'user_id' => auth()->user()->id,
 						'text' => $request->legenda,
