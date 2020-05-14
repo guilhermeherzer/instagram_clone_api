@@ -90,8 +90,8 @@ class PostController extends Controller
 			->where('id', $request->id)
 			->first();
 
-		if($post->user_id == 1):
-			if(unlink($post->display_url) && DB::table('posts')->where('id', $request->id)->delete()):
+		if($post->user_id == auth()->user()->id):
+			if(unlink($post->display_url) && DB::table('posts')->where('id', $request->id)->delete() && DB::table('comentarios')->where('post_id', $request->id)->delete()):
 				$responseData = array('success'=>'1', 'message'=>"Sucesso ao deletar a postagem");
 			else:
 				$responseData = array('success'=>'0', 'message'=>"Erro ao deletar a postagem!");
