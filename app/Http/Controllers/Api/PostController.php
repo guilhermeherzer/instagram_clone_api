@@ -58,23 +58,48 @@ class PostController extends Controller
 				echo "Sorry, your file was not uploaded.";
 			// if everything is ok, try to upload file
 			else:
-				if (imagejpeg($image, $target_file, 50)):
-					$post_data = array(
-						'user_id' => auth()->user()->id,
-						'text' => $request->legenda,
-						'display_url' => $target_file,
-						'location' => '',
-						'pessoas_marcadas' => '',
-						'likes' => serialize(array()),
-						'created_at' => date('Y-m-d H:i:s'),
-						'updated_at' => date('Y-m-d H:i:s')
-					);
+				if(file_exists($target_dir)):
+					if (imagejpeg($image, $target_file, 50)):
+						$post_data = array(
+							'user_id' => auth()->user()->id,
+							'text' => $request->legenda,
+							'display_url' => $target_file,
+							'location' => '',
+							'pessoas_marcadas' => '',
+							'likes' => serialize(array()),
+							'created_at' => date('Y-m-d H:i:s'),
+							'updated_at' => date('Y-m-d H:i:s')
+						);
 
-					$post = DB::table('posts')->insert($post_data);
+						$post = DB::table('posts')->insert($post_data);
 
-					$responseData = array('success'=>'1', 'message'=>"Postagem feita com sucesso!");
+						$responseData = array('success'=>'1', 'message'=>"Postagem feita com sucesso!");
+					else:
+						$responseData = array('success'=>'0', 'message'=>"Sorry, there was an error uploading your file.");
+					endif;
 				else:
-					$responseData = array('success'=>'0', 'message'=>"Sorry, there was an error uploading your file.");
+					if(mkdir($target_dir)):
+						if (imagejpeg($image, $target_file, 50)):
+							$post_data = array(
+								'user_id' => auth()->user()->id,
+								'text' => $request->legenda,
+								'display_url' => $target_file,
+								'location' => '',
+								'pessoas_marcadas' => '',
+								'likes' => serialize(array()),
+								'created_at' => date('Y-m-d H:i:s'),
+								'updated_at' => date('Y-m-d H:i:s')
+							);
+
+							$post = DB::table('posts')->insert($post_data);
+
+							$responseData = array('success'=>'1', 'message'=>"Postagem feita com sucesso!");
+						else:
+							$responseData = array('success'=>'0', 'message'=>"Sorry, there was an error uploading your file.");
+						endif;
+					else:
+							$responseData = array('success'=>'0', 'message'=>"Erro ao criar diretorio.");
+					endif;
 				endif;
 			endif;
 		else:
