@@ -11,111 +11,96 @@ use DB;
 class FeedController extends Controller
 {
     public function feed(Request $request){
-        $data = array();
-
-    	$seguidos = DB::table('seguidos')
-    		->where('user_id', auth()->user()->id)
-    		->first();
-
-    	if($seguidos->lista_seguidos):
-    		$lista_seguidos = unserialize($seguidos->lista_seguidos);
-    	else:
-    		$lista_seguidos = array();
-    	endif;
-
-        /* Informações para os Stories do Feed */
-
         $user = DB::table('users')
-            ->select('id', 'username', 'profile_pic_url')
-            ->whereIn('id', $lista_seguidos)
+            ->select('users.*', 'seguidos.lista_seguidos')
+            ->leftJoin('seguidos', 'seguidos.user_id', 'users.id')
+            ->where('users.id', auth()->user()->id)
+            ->first();
+
+        $users_in_feed = unserialize($user->lista_seguidos);
+
+        array_push($users_in_feed, auth()->user()->id);
+
+        $stories_edges = array();
+
+        $stories = DB::table('users')
+            ->whereIn('id', $users_in_feed)
             ->get();
 
-        foreach($user as $u):
-            if(strlen($u->username) > 9):
-                $user_name = substr($u->username, 0, 9);
-                $user_name = $user_name."...";
+        foreach($stories as $s):
+            if(strlen($s->username) > 9):
+                $username = substr($s->username, 0, 9);
+                $username = $username."...";
             else:
-                $user_name = $u->username;
+                $username = $s->username;
             endif;
 
-            $data['stories'][] = [
-                'id' => $u->id,
-                'user' => $user_name,
-                'user_img' => $u->profile_pic_url
+            $stories_edges[] = [
+                "node" => [
+                    "id" => $s->id,
+                    "username" => $username,
+                    "profile_pic_url" => $s->profile_pic_url
+                ]
             ];
         endforeach;
 
-        /* Informações para os Posts do Feed */
-
-    	array_push($lista_seguidos, intval(auth()->user()->id));
-
         $posts = DB::table('posts')
-            ->select('users.id as user_id', 'users.username', 'users.profile_pic_url', 'posts.*')
+            ->select('posts.*', 'posts.id as postId', 'users.*', 'users.id as userId')
             ->leftJoin('users', 'users.id', 'posts.user_id')
-            ->whereIn('posts.user_id', $lista_seguidos)
+            ->whereIn('posts.user_id', $users_in_feed)
             ->orderBy('posts.created_at', 'desc')
             ->get();
 
-        if($posts):
-            foreach($posts as $p):
-                $p_criado_ha = date('d', (strtotime(date('Y-m-d')) - strtotime(date('Y-m-d', strtotime($p->created_at)))));
+        $posts_edges = array();
 
-                $comentarios = DB::table('comentarios')
-                    ->where('post_id', $p->id)
-                    ->get();
+        foreach($posts as $p):
+            $comments = DB::table('comentarios')
+                ->select('comentarios.*', 'comentarios.id as commentId', 'users.*', 'users.id as userId')
+                ->leftJoin('users', 'users.id', 'comentarios.user_id')
+                ->where('post_id', $p->postId)
+                ->get();
 
-                $comentarios_dados = array();
+            $comments_edges = array();
 
-                $quantidade = count($comentarios);
-
-                foreach($comentarios->slice(0, 2) as $c):
-                    $c_criado_ha = date('d', (strtotime(date('Y-m-d')) - strtotime(date('Y-m-d', strtotime($c->created_at)))));
-                    
-                    $user = DB::table('users')
-                        ->where('id', $c->user_id)
-                        ->first();
-
-                    $comentarios_dados[] = [
-                        'id' => $c->id,
-                        'texto' => $c->texto,
-                        'criado_ha' => $c_criado_ha,
-                        'user' => [
-                            'username' => $user->username,
-                            'profile_pic_url' => $user->profile_pic_url
-                        ]
-                    ];
-                endforeach;
-
-                $likes = unserialize($p->likes);
-                
-                $is_liked = in_array(auth()->user()->id, $likes);
-
-                $user = DB::table('users')
-                	->select('username')
-                	->whereIn('id', $likes)
-                	->first();
-
-                $data['posts'][] = [
-                    'id' => $p->id, 
-                    'display_url' => $p->display_url, 
-                    'legenda' => $p->text, 
-                    'criado_ha' => $p_criado_ha, 
-                    'owner_post' => [
-                        'id' => $p->user_id,
-                        'username' => $p->username, 
-                        'profile_pic_url' => $p->profile_pic_url
-                    ],
-                    'is_liked' => $is_liked,
-                    'preview_likes' => $user,
-                    'count_likes' => count($likes),
-                    'comentarios_contagem' => $quantidade,
-                    'comentarios' => $comentarios_dados
+            foreach($comments->slice(0, 2) as $c):
+                $comments_edges[] = [
+                    "node" => [
+                        "username" => $c->username,
+                        "text" => $c->texto
+                    ]
                 ];
             endforeach;
-        else:
-        endif;
 
-    	$responseData = array('data' => $data);
+            $is_liked = unserialize($p->likes);
+            $is_liked = in_array(auth()->user()->id, $is_liked);
+
+            $posts_edges[] = [
+                "node" => [
+                    "id" => $p->postId,
+                    "display_url" => $p->display_url,
+                    "owner" => [
+                        "id" => $p->userId,
+                        "username" => $p->username,
+                        "profile_pic_url" => $p->profile_pic_url
+                    ],
+                    "text" => $p->text,
+                    "edge_media_to_comment" => [
+                        "count" => count($comments)
+                    ],
+                    "edge_like_by" => [
+                        "count" => count(unserialize($p->likes))
+                    ],
+                    "location" => $p->location,
+                    "is_liked" => $is_liked,
+                    "comments" => $comments_edges
+                ]
+            ];
+        endforeach;
+
+        $responseData = [
+            "stories" => $stories_edges,
+            "posts" => $posts_edges
+        ];
 
     	return response()->json(compact('responseData'));
     }
