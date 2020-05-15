@@ -65,7 +65,6 @@ class PostController extends Controller
 							'text' => $request->legenda,
 							'display_url' => $target_file,
 							'location' => '',
-							'pessoas_marcadas' => '',
 							'likes' => serialize(array()),
 							'created_at' => date('Y-m-d H:i:s'),
 							'updated_at' => date('Y-m-d H:i:s')
@@ -85,7 +84,6 @@ class PostController extends Controller
 								'text' => $request->legenda,
 								'display_url' => $target_file,
 								'location' => '',
-								'pessoas_marcadas' => '',
 								'likes' => serialize(array()),
 								'created_at' => date('Y-m-d H:i:s'),
 								'updated_at' => date('Y-m-d H:i:s')
