@@ -14,34 +14,34 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-	Route::post('/login', 									'Api\AuthController@login');
+	Route::post('/auth/login', 									'Api\AuthController@login');
 
-	Route::post('/cadastrar', 								'Api\AuthController@cadastrar');
+	Route::post('/auth/cadastrar', 								'Api\AuthController@cadastrar');
 
 	Route::group(['middleware' => ['apiJwt']], function(){
-		Route::post('/logout', 									'Api\AuthController@logout');
+		Route::post('/auth/logout', 							'Api\AuthController@logout');
 		
-		Route::post('/me', 										'Api\AuthController@me');
+		Route::post('/auth/me', 								'Api\AuthController@me');
 
-		Route::get('/meu_perfil/',								'Api\PerfilController@meu_perfil');
+		Route::get('/feed',										'Api\FeedController@index');
 
-		Route::get('/feed/',									'Api\FeedController@feed');
+		Route::get('/profile',									'Api\PerfilController@index');
 
-		Route::get('/buscar/{texto?}',							'Api\BuscarController@buscar');
+		Route::get('/profile/{id}',								'Api\PerfilController@show');
 
-		Route::get('/ver_perfil/{id}',							'Api\PerfilController@ver_perfil');
+		Route::get('/search/{text?}',							'Api\BuscarController@index');
 
-		Route::post('/seguir/{id}',								'Api\SeguirController@seguir');
+		Route::post('/follow/{id}',								'Api\SeguirController@store');
 
-		Route::post('/desseguir/{id}',							'Api\SeguirController@desseguir');
+		Route::post('/unfollow/{id}',							'Api\SeguirController@destroy');
 
-		Route::get('/comentarios/{id}',							'Api\ComentariosController@comentarios');
+		Route::get('/comments/{id}',							'Api\ComentariosController@show');
 
-		Route::post('/comentar/{id}/{text}',					'Api\ComentariosController@comentar');
+		Route::post('/comments/store/{id}/{text}',				'Api\ComentariosController@store');
 
-		Route::post('/like/{post_id}',							'Api\LikeController@like');
+		Route::post('/like/{id}',								'Api\LikeController@store');
 
-		Route::post('/publicar/{legenda?}',						'Api\PostController@publicar');
+		Route::post('/publish/{text?}',							'Api\PostController@store');
 
-		Route::post('/publicar/delete/{id}',					'Api\PostController@delete');
+		Route::post('/publish/destroy/{id}',					'Api\PostController@destroy');
 	});

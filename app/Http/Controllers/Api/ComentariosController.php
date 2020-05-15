@@ -9,7 +9,7 @@ use DB;
 
 class ComentariosController extends Controller
 {
-    public function comentarios(Request $request){
+    public function show(Request $request){
         $post = DB::table('posts')
             ->select('users.*', 'users.id as userId', 'posts.*', 'posts.id as postId')
             ->leftJoin('users', 'users.id', 'posts.user_id')
@@ -56,7 +56,7 @@ class ComentariosController extends Controller
         return response()->json(compact('responseData'));
     }
 
-    public function comentar(Request $request){
+    public function store(Request $request){
         $post = DB::table('posts')
             ->where('id', $request->id)
             ->first();

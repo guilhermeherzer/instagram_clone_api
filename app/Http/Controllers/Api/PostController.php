@@ -13,7 +13,7 @@ use Hash;
 class PostController extends Controller
 {
     //
-	public function publicar(Request $request){
+	public function store(Request $request){
 		$name = Hash::make(date('Y-m-d H:i:s'));
 
 		if($request->hasFile('photo')):
@@ -108,7 +108,7 @@ class PostController extends Controller
 		return response()->json(compact('responseData'));
 	}
 
-	public function delete(Request $request) {
+	public function destroy(Request $request) {
 		$post = DB::table('posts')
 			->where('id', $request->id)
 			->first();

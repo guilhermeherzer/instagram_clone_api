@@ -10,7 +10,7 @@ use DB;
 
 class PerfilController extends Controller
 {
-    public function meu_perfil(Request $request){
+    public function index(Request $request){
         $user = DB::table('users')
             ->leftJoin('seguidos', 'seguidos.user_id', 'users.id')
             ->leftJoin('seguidores', 'seguidores.user_id', 'users.id')
@@ -64,7 +64,7 @@ class PerfilController extends Controller
         return response()->json(compact('responseData'));
     }
 
-    public function ver_perfil(Request $request){
+    public function show(Request $request){
         $user = DB::table('users')
             ->leftJoin('seguidos', 'seguidos.user_id', 'users.id')
             ->leftJoin('seguidores', 'seguidores.user_id', 'users.id')

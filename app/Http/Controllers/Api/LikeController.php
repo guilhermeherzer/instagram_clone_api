@@ -9,13 +9,13 @@ use DB;
 
 class LikeController extends Controller
 {
-    public function like(Request $request){
+    public function store(Request $request){
         /*$likes = DB::table('likes')
-            ->where('post_id', $request->post_id)
+            ->where('post_id', $request->id)
             ->first();*/
 
         $post = DB::table('posts')
-            ->where('id', $request->post_id)
+            ->where('id', $request->id)
             ->first();
 
         $users = unserialize($post->likes);
@@ -32,7 +32,7 @@ class LikeController extends Controller
                     'updated_at' => date('Y-m-d H:i:s')
                 );
 
-                $like = DB::table('posts')->where('id', $request->post_id)->update($like_dados);
+                $like = DB::table('posts')->where('id', $request->id)->update($like_dados);
 
                 if($like):
                     $responseData = array('success' => 1, 'is_liked' => true);
@@ -51,7 +51,7 @@ class LikeController extends Controller
                     'updated_at' => date('Y-m-d H:i:s')
                 );
 
-                $like = DB::table('posts')->where('id', $request->post_id)->update($like_dados);
+                $like = DB::table('posts')->where('id', $request->id)->update($like_dados);
 
                 if($like):
                     $responseData = array('success' => 1, 'is_liked' => false);

@@ -9,11 +9,11 @@ use DB;
 
 class BuscarController extends Controller
 {
-    public function buscar(Request $request){
-    	if(!is_null($request->texto)):
+    public function index(Request $request){
+    	if(!is_null($request->text)):
 	    	$users = DB::table('users')
 	    		->select('id', 'full_name', 'username', 'profile_pic_url')
-	    		->where('username', 'LIKE', '%'.$request->texto.'%')
+	    		->where('username', 'LIKE', '%'.$request->text.'%')
 	    		->get();
     	else:
     		$users = array();

@@ -10,7 +10,7 @@ use DB;
 
 class FeedController extends Controller
 {
-    public function feed(Request $request){
+    public function index(Request $request){
         $user = DB::table('users')
             ->select('users.*', 'seguidos.lista_seguidos')
             ->leftJoin('seguidos', 'seguidos.user_id', 'users.id')

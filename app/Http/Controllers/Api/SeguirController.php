@@ -9,7 +9,7 @@ use DB;
 
 class SeguirController extends Controller
 {
-    public function seguir(Request $request){
+    public function store(Request $request){
     	/* Resgata as informações do usuário auth */
     	$user_auth = DB::table('users')
     		->select('users.full_name', 'users.username', 'users.profile_pic_url', 'seguidos.lista_seguidos')
@@ -69,7 +69,7 @@ class SeguirController extends Controller
     	return response()->json(compact('responseData'));
     }
 
-    public function desseguir(Request $request){
+    public function destroy(Request $request){
     	$user_auth = DB::table('users')
     		->leftJoin('seguidos', 'seguidos.user_id', 'users.id')
     		->where('users.id', auth()->user()->id)
