@@ -66,7 +66,7 @@ class FeedController extends Controller
                 $comments_edges[] = [
                     "node" => [
                         "username" => $c->username,
-                        "text" => $c->texto
+                        "text" => $c->text
                     ]
                 ];
             endforeach;
