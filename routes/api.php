@@ -25,19 +25,19 @@ use Illuminate\Support\Facades\Route;
 
 		Route::get('/feed',										'Api\FeedController@index');
 
-		Route::get('/profile',									'Api\PerfilController@index');
+		Route::get('/profile',									'Api\ProfileController@index');
 
-		Route::get('/profile/{id}',								'Api\PerfilController@show');
+		Route::get('/profile/{id}',								'Api\ProfileController@show');
 
-		Route::get('/search/{text?}',							'Api\BuscarController@index');
+		Route::get('/search/{text?}',							'Api\SearchController@index');
 
-		Route::post('/follow/{id}',								'Api\SeguirController@store');
+		Route::post('/follow/{id}',								'Api\FollowController@store');
 
-		Route::post('/unfollow/{id}',							'Api\SeguirController@destroy');
+		Route::post('/unfollow/{id}',							'Api\FollowController@destroy');
 
-		Route::get('/comments/{id}',							'Api\ComentariosController@show');
+		Route::get('/comments/{id}',							'Api\CommentsController@show');
 
-		Route::post('/comments/store/{id}/{text}',				'Api\ComentariosController@store');
+		Route::post('/comments/store/{id}/{text}',				'Api\CommentsController@store');
 
 		Route::post('/like/{id}',								'Api\LikeController@store');
 
