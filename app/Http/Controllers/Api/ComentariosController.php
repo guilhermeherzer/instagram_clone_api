@@ -28,7 +28,7 @@ class ComentariosController extends Controller
             $nodes[] = [
                 "node" => [
                     "id" => $c->comentarioId,
-                    "text" => $c->texto,
+                    "text" => $c->text,
                     "owner" => [
                         "id" => $c->userId,
                         "profile_pic_url" => $c->profile_pic_url,
@@ -65,7 +65,8 @@ class ComentariosController extends Controller
             $comentario_dados = array(
                 'post_id' => $request->id,
                 'user_id' => auth()->user()->id,
-                'texto' => $request->texto,
+                'text' => $request->text,
+                'likes' => serialize(array()),
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             );
