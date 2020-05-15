@@ -37,7 +37,7 @@ use Illuminate\Support\Facades\Route;
 
 		Route::get('/comentarios/{id}',							'Api\ComentariosController@comentarios');
 
-		Route::post('/comentar/{id}/{texto}',					'Api\ComentariosController@comentar');
+		Route::post('/comentar/{id}/{text}',					'Api\ComentariosController@comentar');
 
 		Route::post('/like/{post_id}',							'Api\LikeController@like');
 
